@@ -1,0 +1,17 @@
+body {
+	font-family: "Comic Sans MS",  sans-serif;
+}
+#titulo {
+	margin-top: 35px;
+}
+.elemen_padding {
+	padding: 10px 0 10px 0;
+}
+.font_tags {
+	font-weight: bold;
+}
+.titulo_conteudo {
+	text-decoration-line: underline;
+	color: blue;
+}
+

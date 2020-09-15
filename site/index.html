@@ -1,0 +1,270 @@
+
+
+<!DOCTYPE html>
+<html>
+   <head>
+      <title>Frontend-Conta-Agil</title>
+      <meta charset="utf-8">
+      <link rel="stylesheet" type="text/css" href="bootstrap.min.css">
+      <link rel="stylesheet" type="text/css" href="custom.css">
+      <script src="jquery-3.5.1.js"></script>
+      <script src="popper.min.js"></script>
+      <script src="bootstrap.min.js"></script>
+   </head>
+   <body>
+      <div class="container">
+         <div id="titulo" class="row">
+            <div class="col col-md-12">
+               <h1>VUTTR</h1>
+               <h4 class="elemen_padding">Very Useful Tools to Remember</h4>
+            </div>
+         </div>
+         <div class="row">
+            <div class="col-md-10 elemen_padding">
+               <input type="text" name="search" id="search" placeholder="Search">
+               <input type="checkbox" id="searchtag" name="searchtag" value="searchtag">
+               <label for="searchtag">Search in tags only</label>       
+            </div>
+            <div class="col-md-2">        
+               <button class="btn btn-primary" type="button" onclick="novoTool()">+ Add</button>
+            </div>
+         </div>
+         <div class="row">
+            <div id="body_tools">
+               <!---------------------------- Elementos são adicionados aqui -------------------------->                    
+            </div>
+         </div>
+      </div>
+      <!----------------------------------------------Area de modal-------------------------------------------------->
+     
+      <!-- Modal excluir -->
+      <div class="modal fade" id="deletarModal" tabindex="-1" role="dialog" aria-labelledby="deletarModalLabel" aria-hidden="true">
+         <div class="modal-dialog" role="document">
+            <div class="modal-content">
+               <div class="modal-header">
+                  <h5 class="modal-title" id="deletarModalLabel">Remove Tool</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                  </button>
+               </div>
+               <div class="modal-body">
+                  Are you sure you want to remove Tool
+               </div>
+               <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                  <button type="button" class="btn btn-danger" onclick="delecaoConfirmada()">Yes, remove</button>
+               </div>
+            </div>
+         </div>
+      </div>
+      <!-- Modal excluir fim-->
+      <!-- Modal adicionar -->
+      <div class="modal fade" id="adicionarModal" tabindex="-1" role="dialog" aria-labelledby="deletarModalLabel" aria-hidden="true">
+         <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <form>
+               <div class="modal-header">
+                  <h5 class="modal-title" id="deletarModalLabel">+ Add new tool</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                  </button>
+               </div>
+               <div class="modal-body">
+                  <form id="formTool">
+                     <div class="form-group">
+                        <label for="tool-name" class="col-form-label">Tool name</label>
+                        <input type="text" class="form-control" id="title">
+                     </div>
+                     <div class="form-group">
+                        <label for="tool-link" class="col-form-label">Tool link</label>
+                        <input type="text" class="form-control" id="link">
+                     </div>
+                     <div class="form-group">
+                        <label for="tool-description" class="col-form-label">Tool description</label>
+                        <textarea class="form-control" id="description"></textarea>
+                     </div>
+                     <div class="form-group">
+                        <label for="tool-tag" class="col-form-label">Tags</label>
+                        <input type="text" class="form-control" id="tags">
+                     </div>
+                  </form>
+               </div>
+               <div class="modal-footer">                  
+                  <button type="submit" class="btn btn-primary">Add Tool</button>
+               </div>
+               </form>
+            </div>
+         </div>
+      </div>
+      <!-- Modal adicionar fim-->
+      <script type="text/javascript">
+         function novoTool() {
+             $('#title').val('');
+             $('#link').val('');
+             $('#description').val('');
+             $('#tags').val('');
+             $('#adicionarModal').modal('show');
+
+         }
+         
+         
+         function montarLinha(p) {
+             var linha =
+             '<div class="content elemen_padding">' +
+             
+              '<div class="card">' +
+                  '<div class="card-body">' +
+                     '<div class="row">' +
+                        '<div class="col-md-10">' +
+                          '<a href="'+p.link+'"><h3 class="titulo_conteudo">'+p.title+'</h3></a>' +
+                          
+                        '</div>' +
+                        '<div class="col-md-2">'+       
+                           '<button class="btn btn-danger" type="button" onclick="remover(' + p.id + ')">X Remove</button>' +
+                        '</div>' +
+                     '</div>' +
+                     '<p>' +
+                        p.description+
+                     '</p>' +
+                     '<p class="font_tags"># '+p.tags+'</p>' +
+                  '</div>' +
+                  '</div>' +
+                  
+               '</div>';
+             
+             return linha;
+         }
+         
+         
+         var id_delecao;
+
+         function remover(id) {
+             $('#deletarModal').modal('show');
+             id_delecao = id;
+         }
+
+         function delecaoConfirmada(){
+          var id = id_delecao;
+          $.ajax({
+                 type: "DELETE",
+                 url: "http://localhost:3000/tools/" + id,
+                 context: this,
+                 success: function() {
+                     console.log('Apagou OK');
+                     $('#deletarModal').modal('hide');
+                     location.reload();                     
+                 },
+                 error: function(error) {
+                     console.log(error);                     
+                 }
+             });
+         }
+         
+         function buscarTools(nome) {
+         
+          nome_procura = nome;
+          tag_checada = $('#searchtag').is(":checked");
+         
+          if(nome_procura == ''){
+            location.reload(); 
+          }
+          else {
+                      
+            //Só por tags
+            if (tag_checada) {
+              $.getJSON('http://localhost:3000/tools?tags_like='+nome_procura, function(tools) {          
+                   
+                   if(tools.length == 0 || tools == null || tools == undefined){
+                    $('.content').remove();                                         
+                    //$('#body_tools').append('<div class="content elemen_padding"><h3>Tools Empy!</h3></div>');
+                   }
+                   else{
+                    for(i=0;i<tools.length;i++) {
+                       linha = montarLinha(tools[i]);
+                       //$('.content').remove();                                         
+                       $('#body_tools>.content').html(linha);
+                    }
+                   }
+
+
+                   
+                   
+               }); 
+            }
+            //Tudo
+            else {
+              $.getJSON('http://localhost:3000/tools?q='+nome_procura, function(tools) {          
+                   
+                   if(tools.length == 0 || tools == null || tools == undefined){
+                    $('.content').remove();                                         
+                    
+                   }
+                   else{
+                    for(i=0;i<tools.length;i++) {
+                       linha = montarLinha(tools[i]);
+                       //$('.content').remove();                                         
+                       $('#body_tools>.content').html(linha);
+                    }
+                   }
+                   
+               }); 
+            }
+          }
+                  
+         }
+         
+         function carregarTools() {
+             $.getJSON('http://localhost:3000/tools', function(tools) {           
+                 
+                 for(i=0;i<tools.length;i++) {
+                     linha = montarLinha(tools[i]);
+                                         
+                     $('#body_tools').append(linha);
+                 }
+                 
+             });        
+         }
+
+        
+
+         
+         function criarTool() {
+             tool = { 
+                 title: $("#title").val(), 
+                 link: $("#description").val(), 
+                 description: $("#tags").val(), 
+                 tags: $("#categoriaProduto").val() 
+             };
+             $.post("http://localhost:3000/tools", tool, function(data) {
+                $("#dlgProdutos").modal('hide');///////////////////////////////////
+                 location.reload();         
+             });
+         }
+         
+         
+         
+         $("#formTool").submit( function(event){ 
+             event.preventDefault(); 
+             criarTool();
+                 
+             $("#adicionarModal").modal('hide');
+         });
+                 
+         const inputEnter = document.getElementById('search');
+         inputEnter.addEventListener('keyup', function(e){
+          var key = e.which || e.keyCode;
+          if (key == 13) {            
+            buscarTools(this.value);
+            //alert('Valor digitado foi: ' +this.value);
+          }
+         });
+         
+         
+         $(function(){        
+             carregarTools();
+         })
+         
+      </script>
+   </body>
+</html>
+
